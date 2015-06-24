@@ -2,7 +2,7 @@
   "name": "microservices-clients-restfull",
   "version": "0.0.1",
   "description": "Helper to manage multiple RPC and HTTP Rest Microservices",
-  "main": "./build/index.js",
+  "main": "build/index.js",
   "scripts": {
     "test": "grunt test"
   },
