@@ -26,34 +26,88 @@
    */
 
   _PerformRequest = function(reqType, options, def, cb) {
-    var req;
+    var data, error, req;
+    if (reqTypes[reqType] == null) {
+      reqType = "https";
+    }
+    if (options.host == null) {
+      error = {
+        type: 500,
+        message: "Host required"
+      };
+      def.reject(error);
+      if (cb != null) {
+        cb(error);
+      }
+      return;
+    }
+    if (options.port == null) {
+      error = {
+        type: 500,
+        message: "Port required"
+      };
+      def.reject(error);
+      if (cb != null) {
+        cb(error);
+      }
+      return;
+    }
+    if (options.path == null) {
+      error = {
+        type: 500,
+        message: "Action required"
+      };
+      def.reject(error);
+      if (cb != null) {
+        cb(error);
+      }
+      return;
+    }
+    if (options.data != null) {
+      data = options.data;
+      delete options.data;
+    }
     req = reqTypes[reqType].request(options, function(res) {
       var body;
       res.setEncoding("utf-8");
-      console.log(res.statusCode);
       body = "";
       res.on('data', function(d) {
         return body += d;
       });
       return res.on('end', function() {
-        var parsed;
-        parsed = JSON.parse(body);
-        if (res.statusCode === 200) {
-          def.resolve(parsed);
-          if (cb != null) {
-            cb(null, parsed);
+        var e, parsed;
+        try {
+          parsed = JSON.parse(body);
+          if (res.statusCode === 200) {
+            def.resolve(parsed);
+            if (cb != null) {
+              cb(null, parsed);
+            }
+          } else {
+            def.reject(parsed);
+            if (cb != null) {
+              return cb(parsed);
+            }
           }
-        } else {
-          def.reject(parsed);
+        } catch (_error) {
+          e = _error;
+          error = {
+            status: 500,
+            message: e.toString()
+          };
+          def.reject(error);
           if (cb != null) {
-            return cb(parsed);
+            return cb(error);
           }
         }
       });
     });
+    if (data != null) {
+      req.write(data);
+    }
     req.end();
     return req.on('error', function(e) {
-      var error;
+      console.log(e);
       error = {
         status: 500,
         error: e
@@ -87,7 +141,7 @@
       this.host = opts.host;
       this.port = opts.port;
       this.type = opts.type || "https";
-      this.commonHeaders = headers || {
+      this.commonHeaders = opts.headers || {
         "Content-Type": "application/json"
       };
     }
@@ -96,26 +150,27 @@
     /*
      * Perform a GET request accross the RestMicroService 
      * @method get
-     * @param {string} action - Action
-     * @param {object} data - Query parameters
+     * @option {string} action - Action
+     * @option {object} data - Query parameters
+     * @option {object} headers - Additionnal headers for the request
      * @param {callback} callback - Callback
      * @return promise
      */
 
-    HttpMicroService.prototype.get = function(action, data, cb) {
-      var def, endpoint, headers, options;
-      def = Q.defer();
-      if (typeof data === "function") {
-        cb = data;
-        data = null;
+    HttpMicroService.prototype.get = function(opts, cb) {
+      var action, data, def, endpoint, headers, options;
+      if (cb == null) {
+        cb = null;
       }
+      def = Q.defer();
+      action = opts.action;
+      data = opts.data || {};
+      headers = opts.headers || {};
       endpoint = action;
       if (data != null) {
         endpoint += "?" + querystring.stringify(data);
       }
-      headers = _.extend({}, this.commonHeaders, {
-        "Content-Type": "application/json"
-      });
+      headers = _.extend(headers, this.commonHeaders);
       options = {
         host: this.host,
         port: this.port,
@@ -123,7 +178,7 @@
         method: "GET",
         headers: headers
       };
-      _PerformRequest(this.type, def, cb || null);
+      _PerformRequest(this.type, options, def);
       return def.promise;
     };
 
@@ -131,18 +186,24 @@
     /*
      * Perform a POST request accross the RestMicroService 
      * @method post
-     * @param {string} action - Action
-     * @param {object} data - Post data
+     * @option {string} action - Action
+     * @option {object} data - Body datas
+     * @option {object} headers - Additionnal headers for the request
      * @param {callback} callback - Callback
      * @return promise
      */
 
-    HttpMicroService.prototype.post = function(action, data, cb) {
-      var dataString, headers, options;
-      Q.defer();
+    HttpMicroService.prototype.post = function(opts, cb) {
+      var action, data, dataString, def, headers, options;
+      if (cb == null) {
+        cb = null;
+      }
+      def = Q.defer();
+      action = opts.action;
+      data = opts.data || {};
+      headers = opts.headers || {};
       dataString = JSON.stringify(data);
-      headers = _.extend({}, this.commonHeaders, {
-        "Content-Type": "application/json",
+      headers = _.extend(headers, this.commonHeaders, {
         "Content-Length": dataString.length
       });
       options = {
@@ -150,9 +211,10 @@
         port: this.port,
         path: action,
         method: "POST",
-        headers: headers
+        headers: headers,
+        data: dataString
       };
-      _PerformRequest(options, def, cb);
+      _PerformRequest(this.type, options, def, cb || null);
       return def.promise;
     };
 
@@ -160,18 +222,24 @@
     /*
      * Perform a PUT request accross the RestMicroService 
      * @method put
-     * @param {string} action - Action
-     * @param {object} data - Post data
+     * @option {string} action - Action
+     * @option {object} data - Body datas
+     * @option {object} headers - Additionnal headers for the request
      * @param {callback} callback - Callback
      * @return promise
      */
 
-    HttpMicroService.prototype.put = function(action, datas, cb) {
-      var dataString, headers, options;
-      Q.defer();
+    HttpMicroService.prototype.put = function(opts, cb) {
+      var action, data, dataString, def, headers, options;
+      if (cb == null) {
+        cb = null;
+      }
+      def = Q.defer();
+      action = opts.action;
+      data = opts.data || {};
+      headers = opts.headers || {};
       dataString = JSON.stringify(data);
-      headers = _.extend({}, this.commonHeaders, {
-        "Content-Type": "application/json",
+      headers = _.extend(headers, this.commonHeaders, {
         "Content-Length": dataString.length
       });
       options = {
@@ -179,28 +247,35 @@
         port: this.port,
         path: action,
         method: "PUT",
-        headers: headers
+        headers: headers,
+        data: dataString
       };
-      _PerformRequest(this.type, options, def, cb);
+      _PerformRequest(this.type, options, def, cb || null);
       return def.promise;
     };
 
 
     /*
      * Perform a PATCH request accross the RestMicroService 
-     * @method update
-     * @param {string} action - Action
-     * @param {object} data - Post data
+     * @method patch
+     * @option {string} action - Action
+     * @option {object} data - Body datas
+     * @option {object} headers - Additionnal headers for the request
      * @param {callback} callback - Callback
      * @return promise
      */
 
-    HttpMicroService.prototype.patch = function(action, data, cb) {
-      var dataString, headers, options;
-      Q.defer();
+    HttpMicroService.prototype.patch = function(opts, cb) {
+      var action, data, dataString, def, headers, options;
+      if (cb == null) {
+        cb = null;
+      }
+      def = Q.defer();
+      action = opts.action;
+      data = opts.data || {};
+      headers = opts.headers || {};
       dataString = JSON.stringify(data);
-      headers = _.extend({}, this.commonHeaders, {
-        "Content-Type": "application/json",
+      headers = _.extend(headers, this.commonHeaders, {
         "Content-Length": dataString.length
       });
       options = {
@@ -208,9 +283,10 @@
         port: this.port,
         path: action,
         method: "PATCH",
-        headers: headers
+        headers: headers,
+        data: dataString
       };
-      _PerformRequest(this.type, options, def, cb);
+      _PerformRequest(this.type, options, def, cb || null);
       return def.promise;
     };
 
@@ -218,26 +294,27 @@
     /*
      * Perform a DELETE request accross the RestMicroService 
      * @method delete
-     * @param {string} action - Action
-     * @param {object} data - Query parameters
+     * @option {string} action - Action
+     * @option {object} data - Query parameters
+     * @option {object} headers - Additionnal headers for the request
      * @param {callback} callback - Callback
      * @return promise
      */
 
-    HttpMicroService.prototype["delete"] = function(action, data, cb) {
-      var endpoint, headers, options;
-      Q.defer();
-      if (typeof data === "function") {
-        cb = data;
-        data = null;
+    HttpMicroService.prototype["delete"] = function(opts, cb) {
+      var action, data, def, endpoint, headers, options;
+      if (cb == null) {
+        cb = null;
       }
+      def = Q.defer();
+      action = opts.action;
+      data = opts.data || {};
+      headers = opts.headers || {};
       endpoint = action;
       if (data != null) {
         endpoint += "?" + querystring.stringify(data);
       }
-      headers = _.extend({}, this.commonHeaders, {
-        "Content-Type": "application/json"
-      });
+      headers = _.extend(headers, this.commonHeaders);
       options = {
         host: this.host,
         port: this.port,
@@ -245,7 +322,7 @@
         method: "DELETE",
         headers: headers
       };
-      _PerformRequest(this.type, options, def, cb);
+      _PerformRequest(this.type, options, def, cb || null);
       return def.promise;
     };
 

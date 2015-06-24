@@ -21,10 +21,40 @@ _ = require "underscore"
 # @param {function} cb - Callback
 ###
 _PerformRequest = (reqType, options, def, cb) ->
+  unless reqTypes[reqType]?
+    reqType = "https"
+
+  unless options.host?
+    error =
+      type: 500
+      message: "Host required"
+    def.reject error
+    cb(error) if cb?
+    return
+
+  unless options.port?
+    error =
+      type: 500
+      message: "Port required"
+    def.reject error
+    cb(error) if cb?
+    return
+
+  unless options.path?
+    error =
+      type: 500
+      message: "Action required"
+    def.reject error
+    cb(error) if cb?
+    return
+
+  if options.data?
+    data = options.data
+    delete options.data
+
   # Perform request
   req = reqTypes[reqType].request options, (res) ->
     res.setEncoding "utf-8"
-    console.log res.statusCode
     
     body = ""
 
@@ -33,20 +63,34 @@ _PerformRequest = (reqType, options, def, cb) ->
       body += d
 
     res.on 'end', ->
-      parsed = JSON.parse body
-      if res.statusCode is 200
-        def.resolve parsed
-        cb(null, parsed) if cb?
-        return
-      # Handle an error when status code isnt 200
-      else
-        def.reject parsed
-        cb(parsed) if cb?
+      try
+        parsed = JSON.parse body
 
+        if res.statusCode is 200
+          def.resolve parsed
+          cb(null, parsed) if cb?
+          return
+        # Handle an error when status code isnt 200
+        else
+          def.reject parsed
+          cb(parsed) if cb?
+
+      catch e
+        error =
+          status: 500
+          message: e.toString()
+        def.reject error
+        cb(error) if cb?
+
+
+  if data?
+    req.write data
+  
   req.end()
 
   # Request on error
   req.on 'error', (e) ->
+    console.log e
     # Create a 500 error if there is an issue with the http(s) api
     error =
       status: 500
@@ -73,25 +117,25 @@ module.exports = class HttpMicroService
   constructor: (opts) ->
     @name = opts.name
     @host = opts.host
-    @port = opts.port
+    @port = opts.port    
     @type = opts.type || "https"
-    @commonHeaders = headers || { "Content-Type": "application/json" }
+    @commonHeaders = opts.headers || { "Content-Type": "application/json" }
 
   ###
   # Perform a GET request accross the RestMicroService 
   # @method get
-  # @param {string} action - Action
-  # @param {object} data - Query parameters
+  # @option {string} action - Action
+  # @option {object} data - Query parameters
+  # @option {object} headers - Additionnal headers for the request
   # @param {callback} callback - Callback
   # @return promise
   ###
-  get: (action, data, cb) ->
+  get: (opts, cb = null) ->
     def = Q.defer()
 
-    # Check if datas is a callback 
-    if typeof data is "function"
-      cb = data
-      data = null
+    action = opts.action
+    data = opts.data || {}
+    headers = opts.headers || {}
 
     endpoint = action
 
@@ -100,9 +144,7 @@ module.exports = class HttpMicroService
       endpoint += "?"+querystring.stringify data
 
     # Create headers
-    headers = _.extend {}, @commonHeaders, {
-      "Content-Type": "application/json"
-      }
+    headers = _.extend headers, @commonHeaders
 
     # Create options for the post
     options =
@@ -112,26 +154,30 @@ module.exports = class HttpMicroService
       method: "GET"
       headers: headers
 
-    _PerformRequest @type, def, cb || null
+    _PerformRequest @type, options, def
 
     return def.promise
 
   ###
   # Perform a POST request accross the RestMicroService 
   # @method post
-  # @param {string} action - Action
-  # @param {object} data - Post data
+  # @option {string} action - Action
+  # @option {object} data - Body datas
+  # @option {object} headers - Additionnal headers for the request
   # @param {callback} callback - Callback
   # @return promise
   ###
-  post: (action, data, cb) ->
-    Q.defer()
+  post: (opts, cb = null) ->
+    def = Q.defer()
+
+    action = opts.action
+    data = opts.data || {}
+    headers = opts.headers || {}
     
     dataString = JSON.stringify data
 
     # Create headers
-    headers = _.extend {}, @commonHeaders, {
-      "Content-Type": "application/json"
+    headers = _.extend headers, @commonHeaders, {
       "Content-Length": dataString.length
     }
 
@@ -142,27 +188,32 @@ module.exports = class HttpMicroService
       path: action
       method: "POST"
       headers: headers
+      data: dataString
 
-    _PerformRequest options, def, cb
+    _PerformRequest @type, options, def, cb || null
 
     return def.promise
 
   ###
   # Perform a PUT request accross the RestMicroService 
   # @method put
-  # @param {string} action - Action
-  # @param {object} data - Post data
+  # @option {string} action - Action
+  # @option {object} data - Body datas
+  # @option {object} headers - Additionnal headers for the request
   # @param {callback} callback - Callback
   # @return promise
   ###
-  put: (action, datas, cb) ->
-    Q.defer()
+  put: (opts, cb = null) ->
+    def = Q.defer()
+
+    action = opts.action
+    data = opts.data || {}
+    headers = opts.headers || {}
     
     dataString = JSON.stringify data
 
     # Create headers
-    headers = _.extend {}, @commonHeaders, {
-      "Content-Type": "application/json"
+    headers = _.extend headers, @commonHeaders, {
       "Content-Length": dataString.length
     }
 
@@ -173,27 +224,32 @@ module.exports = class HttpMicroService
       path: action
       method: "PUT"
       headers: headers
+      data: dataString
 
-    _PerformRequest @type, options, def, cb
+    _PerformRequest @type, options, def, cb || null
 
     return def.promise
 
   ###
   # Perform a PATCH request accross the RestMicroService 
-  # @method update
-  # @param {string} action - Action
-  # @param {object} data - Post data
+  # @method patch
+  # @option {string} action - Action
+  # @option {object} data - Body datas
+  # @option {object} headers - Additionnal headers for the request
   # @param {callback} callback - Callback
   # @return promise
   ###
-  patch: (action, data, cb) ->
-    Q.defer()
+  patch: (opts, cb = null) ->
+    def = Q.defer()
+
+    action = opts.action
+    data = opts.data || {}
+    headers = opts.headers || {}
     
     dataString = JSON.stringify data
 
     # Create headers
-    headers = _.extend {}, @commonHeaders, {
-      "Content-Type": "application/json"
+    headers = _.extend headers, @commonHeaders, {
       "Content-Length": dataString.length
     }
 
@@ -204,26 +260,27 @@ module.exports = class HttpMicroService
       path: action
       method: "PATCH"
       headers: headers
+      data: dataString
 
-    _PerformRequest @type, options, def, cb
+    _PerformRequest @type, options, def, cb || null
 
     return def.promise
 
   ###
   # Perform a DELETE request accross the RestMicroService 
   # @method delete
-  # @param {string} action - Action
-  # @param {object} data - Query parameters
+  # @option {string} action - Action
+  # @option {object} data - Query parameters
+  # @option {object} headers - Additionnal headers for the request
   # @param {callback} callback - Callback
   # @return promise
   ###
-  delete: (action, data, cb) ->
-    Q.defer()
+  delete: (opts, cb = null) ->
+    def = Q.defer()
 
-    # Check if datas is a callback 
-    if typeof data is "function"
-      cb = data
-      data = null
+    action = opts.action
+    data = opts.data || {}
+    headers = opts.headers || {}
 
     endpoint = action
 
@@ -232,9 +289,7 @@ module.exports = class HttpMicroService
       endpoint += "?"+querystring.stringify data
 
     # Create headers
-    headers = _.extend {}, @commonHeaders, {
-      "Content-Type": "application/json"
-    }
+    headers = _.extend headers, @commonHeaders
 
     # Create options for the post
     options =
@@ -244,6 +299,6 @@ module.exports = class HttpMicroService
       method: "DELETE"
       headers: headers
 
-    _PerformRequest @type, options, def, cb
+    _PerformRequest @type, options, def, cb || null
 
     return def.promise

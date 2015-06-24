@@ -29,16 +29,17 @@
     "underscore": "~1.7.0"
   },
   "devDependencies": {
-    "grunt": "~0.4.5",
-    "mocha": "~2.1.0",
-    "sinon": "~1.12.2",
+    "backbone": "~1.1.2",
     "chai": "~1.10.0",
-    "grunt-mocha-cli": "~1.11.0",
-    "grunt-config-dir": "~0.3.2",
     "coffee-script": "~1.8.0",
+    "grunt": "~0.4.5",
+    "grunt-config-dir": "~0.3.2",
     "grunt-contrib-coffee": "~0.12.0",
     "grunt-contrib-watch": "~0.6.1",
-    "backbone": "~1.1.2",
+    "grunt-mocha-cli": "~1.11.0",
+    "mocha": "~2.1.0",
+    "nock": "^2.6.0",
+    "sinon": "~1.12.2",
     "sinon-chai": "~2.6.0"
   }
 }
