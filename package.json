@@ -24,6 +24,7 @@
   },
   "homepage": "https://github.com/veacks/microservices-clients-restfull",
   "dependencies": {
+    "dnode": "^1.2.1",
     "q": "~1.1.2",
     "underscore": "~1.7.0"
   },

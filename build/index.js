@@ -2,9 +2,9 @@
   "use strict";
   var HttpMicroService, RpcMicroservice, services;
 
-  HttpMicroService = require("HttpMicroService");
+  HttpMicroService = require("./HttpMicroService");
 
-  RpcMicroservice = require("RpcMicroservice");
+  RpcMicroservice = require("./RpcMicroservice");
 
 
   /*
@@ -22,22 +22,21 @@
      * @param {object} config - Services Configuration
      */
     set: function(config) {
-      var serviceConf, serviceKey, _results;
-      _results = [];
+      var serviceConf, serviceKey;
       for (serviceKey in config) {
         serviceConf = config[serviceKey];
+        serviceConf.name = serviceKey;
         switch (false) {
           case !serviceConf.type.match(/http(s)?/):
-            _results.push(services[serviceKey] = new HttpMicroService(serviceConf));
+            services[serviceKey] = new HttpMicroService(serviceConf);
             break;
           case serviceConf.type !== "rpc":
-            _results.push(services[serviceKey] = new RpcMicroservice(serviceConf));
+            services[serviceKey] = new RpcMicroservice(serviceConf);
             break;
           default:
-            _results.push(void 0);
+            return new Error("Service type not covered");
         }
       }
-      return _results;
     },
 
     /*

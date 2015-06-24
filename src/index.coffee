@@ -1,7 +1,7 @@
 "use strict"
 
-HttpMicroService = require "HttpMicroService"
-RpcMicroservice = require "RpcMicroservice"
+HttpMicroService = require "./HttpMicroService"
+RpcMicroservice = require "./RpcMicroservice"
 
 ###
 # @private services
@@ -17,11 +17,14 @@ module.exports =
   ###
   set: (config) ->
     for serviceKey, serviceConf of config
+      serviceConf.name = serviceKey
       switch
         when serviceConf.type.match /http(s)?/
           services[serviceKey] = new HttpMicroService serviceConf
         when serviceConf.type is "rpc"
           services[serviceKey] = new RpcMicroservice serviceConf
+        else
+          return new Error "Service type not covered"
 
   ###
   # @method get
