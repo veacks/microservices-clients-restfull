@@ -147,7 +147,7 @@ describe "HttpMicroService", ->
       .matchHeader('Content-Type', 'application/json')
       .matchHeader('Foo', "Bar")
       
-      .matchHeader('Content-Length', JSON.stringify(datasToPost).length)
+      .matchHeader('Content-Length', Buffer.byteLength(JSON.stringify(datasToPost)))
       
       .filteringRequestBody (body) ->
         body.should.be.equal JSON.stringify(datasToPost)
@@ -184,7 +184,7 @@ describe "HttpMicroService", ->
       .matchHeader('Content-Type', 'application/json')
       .matchHeader('Foo', "Bar")
       
-      .matchHeader('Content-Length', JSON.stringify(datasToPost).length)
+      .matchHeader('Content-Length', Buffer.byteLength(JSON.stringify(datasToPost)))
       
       .filteringRequestBody (body) ->
         body.should.be.equal JSON.stringify(datasToPost)
@@ -221,7 +221,7 @@ describe "HttpMicroService", ->
       .matchHeader('Content-Type', 'application/json')
       .matchHeader('Foo', "Bar")
       
-      .matchHeader('Content-Length', JSON.stringify(datasToPost).length)
+      .matchHeader('Content-Length', Buffer.byteLength(JSON.stringify(datasToPost)))
       
       .filteringRequestBody (body) ->
         body.should.be.equal JSON.stringify(datasToPost)

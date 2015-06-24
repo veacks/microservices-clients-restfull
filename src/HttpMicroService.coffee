@@ -178,7 +178,7 @@ module.exports = class HttpMicroService
 
     # Create headers
     headers = _.extend headers, @commonHeaders, {
-      "Content-Length": dataString.length
+      "Content-Length": Buffer.byteLength(dataString)
     }
 
     # Create options for the post
@@ -214,7 +214,7 @@ module.exports = class HttpMicroService
 
     # Create headers
     headers = _.extend headers, @commonHeaders, {
-      "Content-Length": dataString.length
+      "Content-Length": Buffer.byteLength(dataString)
     }
 
     # Create options for the post
@@ -250,7 +250,7 @@ module.exports = class HttpMicroService
 
     # Create headers
     headers = _.extend headers, @commonHeaders, {
-      "Content-Length": dataString.length
+      "Content-Length": Buffer.byteLength(dataString)
     }
 
     # Create options for the post

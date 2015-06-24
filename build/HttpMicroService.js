@@ -204,7 +204,7 @@
       headers = opts.headers || {};
       dataString = JSON.stringify(data);
       headers = _.extend(headers, this.commonHeaders, {
-        "Content-Length": dataString.length
+        "Content-Length": Buffer.byteLength(dataString)
       });
       options = {
         host: this.host,
@@ -240,7 +240,7 @@
       headers = opts.headers || {};
       dataString = JSON.stringify(data);
       headers = _.extend(headers, this.commonHeaders, {
-        "Content-Length": dataString.length
+        "Content-Length": Buffer.byteLength(dataString)
       });
       options = {
         host: this.host,
@@ -276,7 +276,7 @@
       headers = opts.headers || {};
       dataString = JSON.stringify(data);
       headers = _.extend(headers, this.commonHeaders, {
-        "Content-Length": dataString.length
+        "Content-Length": Buffer.byteLength(dataString)
       });
       options = {
         host: this.host,
