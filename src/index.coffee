@@ -40,8 +40,3 @@ module.exports =
   # @member HttpMicroService - Direct access to the class HttpMicroService
   ###
   HttpMicroService: HttpMicroService
-
-  ###
-  # @member RpcMicroservice - Direct access to the class RpcMicroservice
-  ###
-  #RpcMicroservice: RpcMicroservice
