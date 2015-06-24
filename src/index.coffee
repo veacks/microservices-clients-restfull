@@ -1,7 +1,7 @@
 "use strict"
 
 HttpMicroService = require "./HttpMicroService"
-RpcMicroservice = require "./RpcMicroservice"
+#RpcMicroservice = require "./RpcMicroservice"
 
 ###
 # @private services
@@ -44,4 +44,4 @@ module.exports =
   ###
   # @member RpcMicroservice - Direct access to the class RpcMicroservice
   ###
-  RpcMicroservice: RpcMicroservice
+  #RpcMicroservice: RpcMicroservice

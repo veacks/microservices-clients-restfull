@@ -1,10 +1,8 @@
 (function() {
   "use strict";
-  var HttpMicroService, RpcMicroservice, services;
+  var HttpMicroService, services;
 
   HttpMicroService = require("./HttpMicroService");
-
-  RpcMicroservice = require("./RpcMicroservice");
 
 
   /*
