@@ -1,10 +1,11 @@
-"user strict"
+"use strict"
 
-RestfullMicroService = require "RestfullMicroService"
+HttpMicroService = require "HttpMicroService"
+RpcMicroservice = require "RpcMicroservice"
 
 ###
 # @private services
-# @description Store the microservices
+# @description Store the microservices internaly
 ###
 services = {}
 
@@ -16,14 +17,28 @@ module.exports =
   ###
   set: (config) ->
     for serviceKey, serviceConf of config
-      services[serviceKey] = new RestfullMicroService serviceConf.host, serviceConf.port, serviceConf.protocol
+      switch
+        when serviceConf.type.match /http(s)?/
+          services[serviceKey] = new HttpMicroService serviceConf
+        when serviceConf.type is "rpc"
+          services[serviceKey] = new RpcMicroservice serviceConf
 
   ###
   # @method get
-  # @description Get the services
+  # @description Get the services by name or globally
   # @param {object} config - Services Configuration
   ###
   get: (name) ->
     if name?
       return services[name]
     return services
+
+  ###
+  # @member HttpMicroService - Direct access to the class HttpMicroService
+  ###
+  HttpMicroService: HttpMicroService
+
+  ###
+  # @member RpcMicroservice - Direct access to the class RpcMicroservice
+  ###
+  RpcMicroservice: RpcMicroservice

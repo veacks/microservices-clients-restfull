@@ -1,0 +1,44 @@
+{
+  "name": "microservices-clients-restfull",
+  "version": "0.0.1",
+  "description": "Helper to manage multiple RPC and HTTP Rest Microservices",
+  "main": "./build/index.js",
+  "scripts": {
+    "test": "grunt test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/veacks/microservices-clients-restfull.git"
+  },
+  "keywords": [
+    "Microservices",
+    "HTTP",
+    "Restfull",
+    "RPC",
+    "dnode"
+  ],
+  "author": "Valentin Dubois",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/veacks/microservices-clients-restfull/issues"
+  },
+  "homepage": "https://github.com/veacks/microservices-clients-restfull",
+  "dependencies": {
+    "q": "~1.1.2",
+    "querystring": "^0.2.0",
+    "underscore": "~1.7.0"
+  },
+  "devDependencies": {
+    "grunt": "~0.4.5",
+    "mocha": "~2.1.0",
+    "sinon": "~1.12.2",
+    "chai": "~1.10.0",
+    "grunt-mocha-cli": "~1.11.0",
+    "grunt-config-dir": "~0.3.2",
+    "coffee-script": "~1.8.0",
+    "grunt-contrib-coffee": "~0.12.0",
+    "grunt-contrib-watch": "~0.6.1",
+    "backbone": "~1.1.2",
+    "sinon-chai": "~2.6.0"
+  }
+}

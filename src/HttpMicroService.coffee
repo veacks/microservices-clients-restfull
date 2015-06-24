@@ -12,6 +12,8 @@ querystring = require "querystring"
 
 Q = require "q"
 
+_ = require "underscore"
+
 ###
 # @private _PerformRequest
 # @param {object} options - Request options
@@ -55,22 +57,25 @@ _PerformRequest = (reqType, options, def, cb) ->
     cb(error) if cb?
 
 ###
-# @class Microservice
+# @class HttpMicroService
 # @description Request perform for microservices
 ###
-module.exports = class RestMicroService
+module.exports = class HttpMicroService
   ###
   # @constructor
-  # @param {string} host - Host of the microservice
-  # @param {string} port - Port of the microservice
-  # @param {string} [type="https"] - Type of connection
-  # @param {string} [headers={}] - Common headers
+  # @param {object} opts - Configuration options
+  # @option {string} name - Name of the service
+  # @option {string} host - Host of the microservice
+  # @option {string} port - Port of the microservice
+  # @option {string} [type="https"] - Type of connection
+  # @option {object} [headers={ "Content-Type": "application/json" }] - Common headers
   ###
-  constructor: (host, port, type = "https", headers = {}) ->
-    @host = host
-    @port = port
-    @type = type
-    @commonHeaders = headers
+  constructor: (opts) ->
+    @name = opts.name
+    @host = opts.host
+    @port = opts.port
+    @type = opts.type || "https"
+    @commonHeaders = headers || { "Content-Type": "application/json" }
 
   ###
   # Perform a GET request accross the RestMicroService 
@@ -95,8 +100,9 @@ module.exports = class RestMicroService
       endpoint += "?"+querystring.stringify data
 
     # Create headers
-    headers =
+    headers = _.extend {}, @commonHeaders, {
       "Content-Type": "application/json"
+      }
 
     # Create options for the post
     options =
@@ -124,9 +130,10 @@ module.exports = class RestMicroService
     dataString = JSON.stringify data
 
     # Create headers
-    headers =
+    headers = _.extend {}, @commonHeaders, {
       "Content-Type": "application/json"
       "Content-Length": dataString.length
+    }
 
     # Create options for the post
     options =
@@ -154,9 +161,10 @@ module.exports = class RestMicroService
     dataString = JSON.stringify data
 
     # Create headers
-    headers =
+    headers = _.extend {}, @commonHeaders, {
       "Content-Type": "application/json"
       "Content-Length": dataString.length
+    }
 
     # Create options for the post
     options =
@@ -184,9 +192,10 @@ module.exports = class RestMicroService
     dataString = JSON.stringify data
 
     # Create headers
-    headers =
+    headers = _.extend {}, @commonHeaders, {
       "Content-Type": "application/json"
       "Content-Length": dataString.length
+    }
 
     # Create options for the post
     options =
@@ -223,8 +232,9 @@ module.exports = class RestMicroService
       endpoint += "?"+querystring.stringify data
 
     # Create headers
-    headers =
+    headers = _.extend {}, @commonHeaders, {
       "Content-Type": "application/json"
+    }
 
     # Create options for the post
     options =
