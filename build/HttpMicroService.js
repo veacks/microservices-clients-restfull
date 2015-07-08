@@ -79,14 +79,14 @@
         try {
           parsed = JSON.parse(body);
           if (res.statusCode === 200) {
-            def.resolve(parsed);
+            def.resolve(parsed, res);
             if (cb != null) {
-              cb(null, parsed);
+              cb(null, parsed, res);
             }
           } else {
-            def.reject(parsed);
+            def.reject(parsed, res);
             if (cb != null) {
-              return cb(parsed);
+              return cb(parsed, res);
             }
           }
         } catch (_error) {
@@ -95,9 +95,9 @@
             status: 500,
             message: e.toString()
           };
-          def.reject(error);
+          def.reject(error, res);
           if (cb != null) {
-            return cb(error);
+            return cb(error, res);
           }
         }
       });

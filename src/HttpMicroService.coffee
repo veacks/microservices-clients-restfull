@@ -55,7 +55,7 @@ _PerformRequest = (reqType, options, def, cb) ->
   # Perform request
   req = reqTypes[reqType].request options, (res) ->
     res.setEncoding "utf-8"
-    
+    #console.log res
     body = ""
 
     # On each buffer, add to the body
@@ -67,20 +67,20 @@ _PerformRequest = (reqType, options, def, cb) ->
         parsed = JSON.parse body
 
         if res.statusCode is 200
-          def.resolve parsed
-          cb(null, parsed) if cb?
+          def.resolve parsed, res
+          cb(null, parsed, res) if cb?
           return
         # Handle an error when status code isnt 200
         else
-          def.reject parsed
-          cb(parsed) if cb?
+          def.reject parsed, res
+          cb(parsed, res) if cb?
 
       catch e
         error =
           status: 500
           message: e.toString()
-        def.reject error
-        cb(error) if cb?
+        def.reject error, res
+        cb(error, res) if cb?
 
 
   if data?
