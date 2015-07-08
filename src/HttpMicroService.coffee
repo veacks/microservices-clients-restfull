@@ -55,6 +55,7 @@ _PerformRequest = (reqType, options, def, cb) ->
   # Perform request
   req = reqTypes[reqType].request options, (res) ->
     res.setEncoding "utf-8"
+    def.promise.response = res
     #console.log res
     body = ""
 
@@ -64,23 +65,24 @@ _PerformRequest = (reqType, options, def, cb) ->
 
     res.on 'end', ->
       try
-        body = "{}" if body is ""
-        parsed = JSON.parse body
+        if res.headers['content-type']? and res.headers['content-type'] is 'application/json'
+          body = "{}" if body is ""
+          body = JSON.parse body
 
         if res.statusCode is 200
-          def.resolve parsed, res
-          cb(null, parsed, res) if cb?
+          def.resolve body
+          cb(null, body, res) if cb?
           return
         # Handle an error when status code isnt 200
         else
-          def.reject parsed, res
-          cb(parsed, res) if cb?
+          def.reject body
+          cb(body, res) if cb?
 
       catch e
         error =
           status: 500
           message: e.toString()
-        def.reject error, res
+        def.reject error
         cb(error, res) if cb?
 
 

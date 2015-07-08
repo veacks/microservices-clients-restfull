@@ -70,26 +70,29 @@
     req = reqTypes[reqType].request(options, function(res) {
       var body;
       res.setEncoding("utf-8");
+      def.promise.response = res;
       body = "";
       res.on('data', function(d) {
         return body += d;
       });
       return res.on('end', function() {
-        var e, parsed;
+        var e;
         try {
-          if (body === "") {
-            body = "{}";
+          if ((res.headers['content-type'] != null) && res.headers['content-type'] === 'application/json') {
+            if (body === "") {
+              body = "{}";
+            }
+            body = JSON.parse(body);
           }
-          parsed = JSON.parse(body);
           if (res.statusCode === 200) {
-            def.resolve(parsed, res);
+            def.resolve(body);
             if (cb != null) {
-              cb(null, parsed, res);
+              cb(null, body, res);
             }
           } else {
-            def.reject(parsed, res);
+            def.reject(body);
             if (cb != null) {
-              return cb(parsed, res);
+              return cb(body, res);
             }
           }
         } catch (_error) {
@@ -98,7 +101,7 @@
             status: 500,
             message: e.toString()
           };
-          def.reject(error, res);
+          def.reject(error);
           if (cb != null) {
             return cb(error, res);
           }
