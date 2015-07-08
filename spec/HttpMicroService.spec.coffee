@@ -52,6 +52,34 @@ describe "HttpMicroService", ->
     # Check action
     # Check wrong type
 
+  describe "HEAD", ->
+    it "Should perform an Https HEAD request", (done) ->
+      nock "https://localhost:3000"
+      .matchHeader('Content-Type', 'application/json')
+      .matchHeader('Foo', "Bar")
+      .head "/controller/page?foo=bar"
+      .reply 200, { key: "value" }, {
+        'Content-Type': 'application/json'
+      }
+
+      service = new HttpMicroService
+        name: "testApi"
+        host: "localhost"
+        port: 3000
+
+      service.head
+        action: "/controller/page"
+        data:
+          foo: "bar"
+        headers:
+          "Foo": "Bar"
+
+      .catch (err) ->
+        should.not.exits err
+        done()
+      .then (resp) ->
+        resp.should.be.eql { key: "value" }
+        done()
 
   describe "GET", ->
     it "Should perform an Https GET request", (done) ->

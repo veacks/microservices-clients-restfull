@@ -159,6 +159,43 @@ module.exports = class HttpMicroService
     return def.promise
 
   ###
+  # Perform a GET request accross the RestMicroService 
+  # @method get
+  # @option {string} action - Action
+  # @option {object} data - Query parameters
+  # @option {object} headers - Additionnal headers for the request
+  # @param {callback} callback - Callback
+  # @return promise
+  ###
+  head: (opts, cb = null) ->
+    def = Q.defer()
+
+    action = opts.action
+    data = opts.data || {}
+    headers = opts.headers || {}
+
+    endpoint = action
+
+    if data?
+      # Set datas as string
+      endpoint += "?"+querystring.stringify data
+
+    # Create headers
+    headers = _.extend headers, @commonHeaders
+
+    # Create options for the post
+    options =
+      host: @host
+      port: @port
+      path: endpoint
+      method: "HEAD"
+      headers: headers
+
+    _PerformRequest @type, options, def
+
+    return def.promise
+
+  ###
   # Perform a POST request accross the RestMicroService 
   # @method post
   # @option {string} action - Action

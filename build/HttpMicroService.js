@@ -184,6 +184,42 @@
 
 
     /*
+     * Perform a GET request accross the RestMicroService 
+     * @method get
+     * @option {string} action - Action
+     * @option {object} data - Query parameters
+     * @option {object} headers - Additionnal headers for the request
+     * @param {callback} callback - Callback
+     * @return promise
+     */
+
+    HttpMicroService.prototype.head = function(opts, cb) {
+      var action, data, def, endpoint, headers, options;
+      if (cb == null) {
+        cb = null;
+      }
+      def = Q.defer();
+      action = opts.action;
+      data = opts.data || {};
+      headers = opts.headers || {};
+      endpoint = action;
+      if (data != null) {
+        endpoint += "?" + querystring.stringify(data);
+      }
+      headers = _.extend(headers, this.commonHeaders);
+      options = {
+        host: this.host,
+        port: this.port,
+        path: endpoint,
+        method: "HEAD",
+        headers: headers
+      };
+      _PerformRequest(this.type, options, def);
+      return def.promise;
+    };
+
+
+    /*
      * Perform a POST request accross the RestMicroService 
      * @method post
      * @option {string} action - Action
