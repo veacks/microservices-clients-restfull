@@ -78,7 +78,7 @@
         var e, parsed;
         try {
           if (body === "") {
-            body = {};
+            body = "{}";
           }
           parsed = JSON.parse(body);
           if (res.statusCode === 200) {

@@ -64,7 +64,7 @@ _PerformRequest = (reqType, options, def, cb) ->
 
     res.on 'end', ->
       try
-        body = {} if body is ""
+        body = "{}" if body is ""
         parsed = JSON.parse body
 
         if res.statusCode is 200
