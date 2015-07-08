@@ -77,6 +77,9 @@
       return res.on('end', function() {
         var e, parsed;
         try {
+          if (body === "") {
+            body = {};
+          }
           parsed = JSON.parse(body);
           if (res.statusCode === 200) {
             def.resolve(parsed, res);
