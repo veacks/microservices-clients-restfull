@@ -78,7 +78,7 @@
       return res.on('end', function() {
         var e;
         try {
-          if ((res.headers['content-type'] != null) && res.headers['content-type'] === 'application/json') {
+          if ((res.headers['content-type'] != null) && (res.headers['content-type'].match(/json/) != null)) {
             if (body === "") {
               body = "{}";
             }

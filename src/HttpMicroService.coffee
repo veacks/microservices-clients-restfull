@@ -65,7 +65,7 @@ _PerformRequest = (reqType, options, def, cb) ->
 
     res.on 'end', ->
       try
-        if res.headers['content-type']? and res.headers['content-type'] is 'application/json'
+        if res.headers['content-type']? and res.headers['content-type'].match(/json/)?
           body = "{}" if body is ""
           body = JSON.parse body
 
